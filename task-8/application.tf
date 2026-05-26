@@ -180,6 +180,13 @@ resource "aws_lb_target_group" "main" {
   protocol = var.target_group_protocol
   vpc_id   = data.aws_vpc.main.id
 
+  load_balancing_algorithm_type = "round_robin"
+
+  stickiness {
+    type    = "lb_cookie"
+    enabled = false
+  }
+
   health_check {
     enabled             = var.health_check_config.enabled
     healthy_threshold   = var.health_check_config.healthy_threshold
