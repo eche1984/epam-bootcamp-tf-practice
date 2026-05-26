@@ -2,7 +2,7 @@ resource "aws_s3_bucket" "main" {
   bucket = "cmtr-d3wf0oa8-bucket-1779754616"
 
   tags = {
-    Project = "cmtr-d3wf0oa8"
+    Project = var.project_tag
   }
 }
 
