@@ -1,11 +1,11 @@
 variable "project_tag" {
   description = "Project tag value"
-  type        = string  
+  type        = string
 }
 
 variable "id_tag" {
   description = "ID tag value"
-  type        = string  
+  type        = string
 }
 
 variable "ssh_key" {
