@@ -1,0 +1,6 @@
+aws_region    = "eu-west-1"
+project_id    = "cmtr-d3wf0oa8"
+state_bucket  = "cmtr-d3wf0oa8-tf-state-1779822695"
+state_key     = "infra.tfstate"
+instance_type = "t3.micro"
+instance_name = "cmtr-d3wf0oa8-ec2"
