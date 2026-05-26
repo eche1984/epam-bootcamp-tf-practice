@@ -1,7 +1,7 @@
 project_tag = "cmtr-d3wf0oa8"
-aws_region = "eu-west-1"
+aws_region  = "eu-west-1"
 
-vpc_name = "cmtr-d3wf0oa8-01-vpc"
+vpc_name       = "cmtr-d3wf0oa8-01-vpc"
 vpc_cidr_block = "10.10.0.0/16"
 
 public_subnets = {
@@ -22,10 +22,10 @@ public_subnets = {
   }
 }
 
-igw_name         = "cmtr-d3wf0oa8-igw"
+igw_name         = "cmtr-d3wf0oa8-01-igw"
 route_table_name = "cmtr-d3wf0oa8-01-rt"
 
 common_tags = {
-  Project = "cmtr-d3wf0oa8"
-  ManagedBy   = "Terraform"
+  Project   = "cmtr-d3wf0oa8"
+  ManagedBy = "Terraform"
 }

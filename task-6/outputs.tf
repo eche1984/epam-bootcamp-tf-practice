@@ -3,26 +3,26 @@ output "vpc_id" {
   value       = aws_vpc.main.id
 }
 
-output "vpc_cidr_block" {
+output "vpc_cidr" {
   description = "VPC CIDR block"
   value       = aws_vpc.main.cidr_block
 }
 
-output "public_subnet_id_list" {
+output "public_subnet_ids" {
   description = "The IDs of all public subnets"
   value = {
     for key, subnet in aws_subnet.public : key => subnet.id
   }
 }
 
-output "public_subnet_cidr_block_list" {
+output "public_subnet_cidr_block" {
   description = "The CIDR blocks of all public subnets"
   value = {
     for key, subnet in aws_subnet.public : key => subnet.cidr_block
   }
 }
 
-output "public_subnet_az_list" {
+output "public_subnet_availability_zone" {
   description = "The Availability Zones of all public subnets"
   value = {
     for key, subnet in aws_subnet.public : key => subnet.availability_zone
