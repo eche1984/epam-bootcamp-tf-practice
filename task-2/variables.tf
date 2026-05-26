@@ -1,9 +1,3 @@
-variable "ssh_key" {
-  description = "Provides custom public SSH key"
-  type        = string
-  sensitive   = true
-}
-
 variable "project_tag" {
   description = "Project tag value"
   type        = string  
@@ -12,4 +6,10 @@ variable "project_tag" {
 variable "id_tag" {
   description = "ID tag value"
   type        = string  
+}
+
+variable "ssh_key" {
+  description = "Provides custom public SSH key"
+  type        = string
+  sensitive   = true
 }
