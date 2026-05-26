@@ -18,7 +18,7 @@ data "aws_ami" "amazon_linux_2023" {
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
-    values = ["cmtr-d3wf0oa8-vpc"]
+    values = [var.vpc_name]
   }
 }
 
@@ -29,7 +29,7 @@ data "aws_subnet" "public_a" {
   }
   filter {
     name   = "cidr-block"
-    values = ["10.0.1.0/24"]
+    values = [var.subnet_cidrs.public_a_cidr]
   }
 }
 
@@ -40,7 +40,7 @@ data "aws_subnet" "public_b" {
   }
   filter {
     name   = "cidr-block"
-    values = ["10.0.3.0/24"]
+    values = [var.subnet_cidrs.public_b_cidr]
   }
 }
 
@@ -51,7 +51,7 @@ data "aws_subnet" "private_a" {
   }
   filter {
     name   = "cidr-block"
-    values = ["10.0.2.0/24"]
+    values = [var.subnet_cidrs.private_a_cidr]
   }
 }
 
@@ -62,37 +62,37 @@ data "aws_subnet" "private_b" {
   }
   filter {
     name   = "cidr-block"
-    values = ["10.0.4.0/24"]
+    values = [var.subnet_cidrs.private_b_cidr]
   }
 }
 
 data "aws_security_group" "ec2_sg" {
   filter {
     name   = "tag:Name"
-    values = ["cmtr-d3wf0oa8-ec2_sg"]
+    values = [var.security_group_names.ec2_sg]
   }
 }
 
 data "aws_security_group" "http_sg" {
   filter {
     name   = "tag:Name"
-    values = ["cmtr-d3wf0oa8-http_sg"]
+    values = [var.security_group_names.http_sg]
   }
 }
 
 data "aws_security_group" "sglb" {
   filter {
     name   = "tag:Name"
-    values = ["cmtr-d3wf0oa8-sglb"]
+    values = [var.security_group_lb_name]
   }
 }
 
 data "aws_iam_instance_profile" "instance_profile" {
-  name = "cmtr-d3wf0oa8-instance_profile"
+  name = var.iam_instance_profile_name
 }
 
 data "aws_key_pair" "keypair" {
-  key_name = "cmtr-d3wf0oa8-keypair"
+  key_name = var.key_pair_name
 }
 
 # User data script
@@ -131,9 +131,9 @@ locals {
 
 # Launch Template
 resource "aws_launch_template" "main" {
-  name_prefix   = "cmtr-d3wf0oa8-template"
+  name_prefix   = "${var.launch_template_name}-"
   image_id      = data.aws_ami.amazon_linux_2023.id
-  instance_type = "t3.micro"
+  instance_type = var.instance_type
   key_name      = data.aws_key_pair.keypair.key_name
 
   iam_instance_profile {
@@ -152,24 +152,20 @@ resource "aws_launch_template" "main" {
   user_data = base64encode(local.user_data)
 
   metadata_options {
-    http_endpoint = "enabled"
-    http_tokens   = "optional"
+    http_endpoint = var.metadata_options.http_endpoint
+    http_tokens   = var.metadata_options.http_tokens
   }
 
   tag_specifications {
     resource_type = "instance"
-    tags = {
-      Terraform = "true"
-      Project   = "cmtr-d3wf0oa8"
-    }
+    tags = merge(var.common_tags, {
+      Name = "${var.project_id}-ec2"
+    })
   }
 
   tag_specifications {
     resource_type = "volume"
-    tags = {
-      Terraform = "true"
-      Project   = "cmtr-d3wf0oa8"
-    }
+    tags          = var.common_tags
   }
 
   lifecycle {
@@ -179,72 +175,64 @@ resource "aws_launch_template" "main" {
 
 # Target Group for Load Balancer
 resource "aws_lb_target_group" "main" {
-  name     = "cmtr-d3wf0oa8-tg"
-  port     = 80
-  protocol = "HTTP"
+  name     = var.target_group_name
+  port     = var.target_group_port
+  protocol = var.target_group_protocol
   vpc_id   = data.aws_vpc.main.id
 
   health_check {
-    enabled             = true
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 5
-    interval            = 30
-    path                = "/"
-    protocol            = "HTTP"
-    matcher             = "200"
+    enabled             = var.health_check_config.enabled
+    healthy_threshold   = var.health_check_config.healthy_threshold
+    unhealthy_threshold = var.health_check_config.unhealthy_threshold
+    timeout             = var.health_check_config.timeout
+    interval            = var.health_check_config.interval
+    path                = var.health_check_config.path
+    protocol            = var.health_check_config.protocol
+    matcher             = var.health_check_config.matcher
   }
 
-  tags = {
-    Terraform = "true"
-    Project   = "cmtr-d3wf0oa8"
-  }
+  tags = var.common_tags
 }
 
 # Application Load Balancer
 resource "aws_lb" "main" {
-  name               = "cmtr-d3wf0oa8-loadbalancer"
-  internal           = false
-  load_balancer_type = "application"
+  name               = var.load_balancer_name
+  internal           = var.load_balancer_internal
+  load_balancer_type = var.load_balancer_type
   security_groups    = [data.aws_security_group.sglb.id]
   subnets = [
     data.aws_subnet.public_a.id,
     data.aws_subnet.public_b.id
   ]
 
-  tags = {
-    Terraform = "true"
-    Project   = "cmtr-d3wf0oa8"
-  }
+  tags = var.common_tags
 }
 
 # Listener
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = var.listener_port
+  protocol          = var.listener_protocol
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.main.arn
   }
 
-  tags = {
-    Terraform = "true"
-    Project   = "cmtr-d3wf0oa8"
-  }
+  tags = var.common_tags
 }
 
 # Auto Scaling Group
 resource "aws_autoscaling_group" "main" {
-  name = "cmtr-d3wf0oa8-asg"
+  name = var.asg_name
   vpc_zone_identifier = [
     data.aws_subnet.public_a.id,
     data.aws_subnet.public_b.id
   ]
-  desired_capacity = 2
-  min_size         = 1
-  max_size         = 2
+
+  desired_capacity = var.asg_capacity.desired
+  min_size         = var.asg_capacity.min
+  max_size         = var.asg_capacity.max
 
   launch_template {
     id      = aws_launch_template.main.id
@@ -252,22 +240,16 @@ resource "aws_autoscaling_group" "main" {
   }
 
   lifecycle {
-    ignore_changes = [
-      load_balancers,
-      target_group_arns
-    ]
+    ignore_changes = [load_balancers, target_group_arns]
   }
 
-  tag {
-    key                 = "Terraform"
-    value               = "true"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Project"
-    value               = "cmtr-d3wf0oa8"
-    propagate_at_launch = true
+  dynamic "tag" {
+    for_each = var.common_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
   }
 
   depends_on = [aws_lb_listener.http]
