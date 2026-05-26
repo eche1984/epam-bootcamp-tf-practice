@@ -46,7 +46,7 @@ health_check_config = {
   unhealthy_threshold = 2
   timeout             = 5
   interval            = 30
-  path                = "/"
+  path                = "/index.html"
   protocol            = "HTTP"
   matcher             = "200"
 }
