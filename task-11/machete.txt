@@ -1,0 +1,13 @@
+# Inicializar usando el bucket original
+terraform init \
+  -backend-config="bucket=cmtr-d3wf0oa8-backend-bucket-1779906396" \
+  -backend-config="key=tf_code.tfstate" \
+  -backend-config="region=eu-west-1"
+
+# Migrar directamente usando la línea de comandos
+terraform init \
+  -backend-config="bucket=cmtr-d3wf0oa8-backend-new-bucket-1779906396" \
+  -backend-config="key=tf_code.tfstate" \
+  -backend-config="region=eu-west-1" \
+  -migrate-state
+
