@@ -1,0 +1,7 @@
+# Bajar los estados remotos y ejecutar:
+terraform state mv -state=tf_code_1.tfstate -state-out=../tf_code_2/tf_code_2.tfstate aws_iam_policy.custom_policy aws_iam_policy.custom_policy
+
+# Actualizar los estados remotos
+terraform state push tf_code_1.tfstate
+terraform state push tf_code_2.tfstate
+
