@@ -5,8 +5,8 @@ resource "aws_iam_policy" "custom_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = ["ec2:*", "s3:*"], # Replace with specific actions
+        Effect = "Allow",
+        Action = ["ec2:*", "s3:*"], # Replace with specific actions
         Resource = "*"
       }
     ]
