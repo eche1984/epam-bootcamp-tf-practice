@@ -100,8 +100,6 @@ locals {
   user_data = <<-EOF
     #!/bin/bash
 
-    sleep 60
-
     # Update system packages
     sudo dnf update -y
     
