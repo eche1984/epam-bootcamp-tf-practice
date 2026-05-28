@@ -106,7 +106,7 @@ locals {
     sudo dnf update -y
     
     # Install required packages
-    sudo dnf install -y httpd jq
+    sudo dnf install -y httpd jq curl
     
     # Enable and start web server
     sudo systemctl enable httpd
@@ -116,13 +116,17 @@ locals {
     TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
     INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
     PRIVATE_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)
+    PUBLIC_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/public-ipv4)
     
     # Create index.html with instance information
     cat > /var/www/html/index.html << HTML
     <html>
     <head><title>EC2 Instance Info</title></head>
     <body>
-    <h1>This message was generated on instance $INSTANCE_ID with the following IP: $PRIVATE_IP</h1>
+    <h1>Instance ID: $INSTANCE_ID</h1>
+    <h2>Private IP: $PRIVATE_IP</h2>
+    <h2>Public IP: $PUBLIC_IP</h2>
+    <p>This message was generated on instance $INSTANCE_ID</p>
     </body>
     </html>
     HTML
@@ -237,9 +241,11 @@ resource "aws_autoscaling_group" "main" {
     data.aws_subnet.public_b.id
   ]
 
-  desired_capacity = var.asg_capacity.desired
-  min_size         = var.asg_capacity.min
-  max_size         = var.asg_capacity.max
+  desired_capacity          = var.asg_capacity.desired
+  min_size                  = var.asg_capacity.min
+  max_size                  = var.asg_capacity.max
+  health_check_type         = "ELB"
+  health_check_grace_period = 60
 
   launch_template {
     id      = aws_launch_template.main.id
@@ -248,6 +254,12 @@ resource "aws_autoscaling_group" "main" {
 
   lifecycle {
     ignore_changes = [load_balancers, target_group_arns]
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.project_id}-asg"
+    propagate_at_launch = true
   }
 
   dynamic "tag" {
