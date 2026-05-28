@@ -20,18 +20,6 @@ resource "aws_security_group_rule" "ssh_ingress" {
   description       = "Allow SSH from allowed IP ranges"
 }
 
-/*
-resource "aws_security_group_rule" "ssh_icmp_ingress" {
-  type              = "ingress"
-  from_port         = -1
-  to_port           = -1
-  protocol          = "icmp"
-  cidr_blocks       = var.allowed_ip_ranges
-  security_group_id = aws_security_group.ssh.id
-  description       = "Allow ICMP from allowed IP ranges"
-}
-*/
-
 # Public HTTP Security Group
 resource "aws_security_group" "public_http" {
   name        = var.public_http_sg_name
@@ -54,18 +42,6 @@ resource "aws_security_group_rule" "http_ingress" {
   description       = "Allow HTTP from allowed IP ranges"
 }
 
-/*
-resource "aws_security_group_rule" "public_http_icmp_ingress" {
-  type              = "ingress"
-  from_port         = -1
-  to_port           = -1
-  protocol          = "icmp"
-  cidr_blocks       = var.allowed_ip_ranges
-  security_group_id = aws_security_group.public_http.id
-  description       = "Allow ICMP from allowed IP ranges"
-}
-*/
-
 # Private HTTP Security Group
 resource "aws_security_group" "private_http" {
   name        = var.private_http_sg_name
@@ -87,18 +63,6 @@ resource "aws_security_group_rule" "private_http_ingress" {
   security_group_id        = aws_security_group.private_http.id
   description              = "Allow HTTP from public HTTP security group"
 }
-
-/*
-resource "aws_security_group_rule" "private_http_icmp_ingress" {
-  type                     = "ingress"
-  from_port                = -1
-  to_port                  = -1
-  protocol                 = "icmp"
-  source_security_group_id = aws_security_group.public_http.id
-  security_group_id        = aws_security_group.private_http.id
-  description              = "Allow ICMP from public HTTP security group"
-}
-*/
 
 # Egress rules for all security groups
 resource "aws_security_group_rule" "ssh_egress" {
