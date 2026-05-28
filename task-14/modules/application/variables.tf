@@ -66,7 +66,7 @@ variable "asg_capacity" {
 variable "ami_id" {
   description = "AMI ID for EC2 instances"
   type        = string
-  default     = null  # Will use data source if not provided
+  default     = null # Will use data source if not provided
 }
 
 variable "common_tags" {

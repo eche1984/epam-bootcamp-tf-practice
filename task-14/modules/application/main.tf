@@ -107,12 +107,12 @@ resource "aws_launch_template" "main" {
 
 # Auto Scaling Group
 resource "aws_autoscaling_group" "main" {
-  name                = var.asg_name
-  vpc_zone_identifier = var.subnet_ids
-  desired_capacity    = var.asg_capacity.desired
-  min_size            = var.asg_capacity.min
-  max_size            = var.asg_capacity.max
-  health_check_type   = "ELB"
+  name                      = var.asg_name
+  vpc_zone_identifier       = var.subnet_ids
+  desired_capacity          = var.asg_capacity.desired
+  min_size                  = var.asg_capacity.min
+  max_size                  = var.asg_capacity.max
+  health_check_type         = "ELB"
   health_check_grace_period = 60
 
   launch_template {
@@ -130,13 +130,13 @@ resource "aws_autoscaling_group" "main" {
     propagate_at_launch = true
   }
 
-  
+
   dynamic "tag" {
     for_each = var.common_tags
     content {
       key                 = tag.key
       value               = tag.value
-      propagate_at_launch = true      
+      propagate_at_launch = true
     }
   }
 }
