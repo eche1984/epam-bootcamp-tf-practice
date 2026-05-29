@@ -100,11 +100,13 @@ locals {
   user_data = <<-EOF
     #!/bin/bash
 
+    sleep 10
+
     # Update system packages
     sudo dnf update -y
     
     # Install required packages
-    sudo dnf install -y httpd jq curl
+    sudo dnf install -y httpd jq
     
     # Enable and start web server
     sudo systemctl enable httpd
@@ -124,7 +126,8 @@ locals {
     <h1>Instance ID: $INSTANCE_ID</h1>
     <h2>Private IP: $PRIVATE_IP</h2>
     <h2>Public IP: $PUBLIC_IP</h2>
-    <p>This message was generated on instance $INSTANCE_ID</p>
+    <p>This message was generated on instance $INSTANCE_ID with the following IP: $PRIVATE_IP</p>
+    <p>This message was generated on instance $INSTANCE_ID with the following IP: $PUBLIC_IP</p>
     </body>
     </html>
     HTML
